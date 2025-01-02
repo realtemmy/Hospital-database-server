@@ -4,16 +4,11 @@ const patientSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: [true, "Patient must be a user"],
+    unique: true,
   },
   bloodType: {
     type: String,
-  },
-  role: {
-    type: String,
-    enum: {
-      values: ["Patient", "Physician", "Admin"],
-      message: "{VALUE} is not supported as a user role"
-    },
   },
   medicalHistory: [
     {
@@ -25,11 +20,12 @@ const patientSchema = new mongoose.Schema({
           values: ["ongoing", "resolved"],
           message: "{VALUE} is not supported",
         },
+        default: "ongoing",
       },
       resolvedDate: Date,
       assignedDoctor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", //User that's a doctor
+        ref: "Physician",
       },
       note: String,
     },
@@ -43,7 +39,7 @@ const patientSchema = new mongoose.Schema({
       endDate: Date,
       assignedPhysician: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Physician",
       },
       note: String,
     },
