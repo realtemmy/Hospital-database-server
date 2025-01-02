@@ -14,7 +14,10 @@ const patientSchema = new mongoose.Schema({
       dateDiagnosed: Date,
       status: {
         type: String,
-        enum: ["ongoing", "resolved"],
+        enum: {
+            values: ["ongoing", "resolved"],
+            message: "{VALUE} is not supported"
+        },
       },
       resolvedDate: Date,
       assignedDoctor: {
