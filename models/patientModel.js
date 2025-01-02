@@ -8,6 +8,13 @@ const patientSchema = new mongoose.Schema({
   bloodType: {
     type: String,
   },
+  role: {
+    type: String,
+    enum: {
+      values: ["Patient", "Physician", "Admin"],
+      message: "{VALUE} is not supported as a user role"
+    },
+  },
   medicalHistory: [
     {
       condition: String,
@@ -15,8 +22,8 @@ const patientSchema = new mongoose.Schema({
       status: {
         type: String,
         enum: {
-            values: ["ongoing", "resolved"],
-            message: "{VALUE} is not supported"
+          values: ["ongoing", "resolved"],
+          message: "{VALUE} is not supported",
         },
       },
       resolvedDate: Date,
