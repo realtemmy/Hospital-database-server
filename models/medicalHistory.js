@@ -1,34 +1,45 @@
 const mongoose = require("mongoose");
 
-const medicalHistorySchema = new mongoose.Schema({
+// When diagnosis is completed or started sha, create a medical history for the patient
+const medicalHistorySchema = new mongoose.Schema(
+  {
     patient: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+      required: true,
     },
     doctor: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Physician",
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Physician",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ["ongoing", "resolved"],
+        message: "{VALUE} is not supported",
+      },
+      default: "ongoing",
     },
     diagnosis: {
-        type: String,
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Diagnosis",
+      required: [true, "Diagnosis must be specified"],
     },
     treatment: {
-        type: String,
-        required: true,
-    },
-    prescription: {
-        type: String,
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Treatment",
     },
     notes: {
-        type: String,
-        required: false,
-        trim: true,
+      type: String,
+      trim: true,
     },
-    },
-    {
+  },
+  {
     timestamps: true,
-});
+  }
+);
+
+const MedicalHistory = mongoose.model("MedicalHistory", medicalHistorySchema);
+
+module.exports = MedicalHistory;
