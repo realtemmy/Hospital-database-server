@@ -8,11 +8,6 @@ const medicalHistorySchema = new mongoose.Schema(
       ref: "Patient",
       required: true,
     },
-    doctor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Physician",
-      required: true,
-    },
     status: {
       type: String,
       enum: {
@@ -25,10 +20,6 @@ const medicalHistorySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Diagnosis",
       required: [true, "Diagnosis must be specified"],
-    },
-    treatment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Treatment",
     },
     notes: {
       type: String,

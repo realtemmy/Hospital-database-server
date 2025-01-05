@@ -29,7 +29,7 @@ const appointmentSchema = new mongoose.Schema(
       ref: "Diagnosis",
       // required: [true, "Diagnosis must be specified for the appointment"],
     },
-    testResult: [
+    testResults: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "TestResult",

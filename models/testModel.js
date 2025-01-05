@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const TestResults = new mongoose.Schema({
+const testSchema = new mongoose.Schema({
   patient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Patient",
@@ -15,11 +15,19 @@ const TestResults = new mongoose.Schema({
     type: String,
     required: [true, "Test name is required"],
   },
+  appointment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Appointment",
+    required: [true, "Appointment is required"],
+  },
   category: {
     type: String, // eg Blood chemistry, hematology, microbiology, immunology,
     required: [true, "Category is required"],
   },
   resultValue: {
+    type: String,
+  },
+  image: {
     type: String,
   },
   interpretation: {
@@ -28,4 +36,11 @@ const TestResults = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("TestResults", TestResults);
+testSchema.pre("save", function (next) {
+  // if the physician type is not radiologist or lab scientist, throw error
+  next();
+});
+
+const TestResults = mongoose.model("TestResults", testSchema);
+
+module.exports = TestResults;
