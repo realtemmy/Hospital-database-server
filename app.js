@@ -12,6 +12,7 @@ const app = express();
 // appointment is booked by a patient/hospital admin
 // appointment is confirmed by the doctor
 // patient is diagnosed by the doctor
+// Doctor orders test to know more(optional)
 // doctor prescribes treatment
 // patient is treated
 

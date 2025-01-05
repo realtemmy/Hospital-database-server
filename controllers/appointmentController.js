@@ -20,18 +20,26 @@ exports.getUserAppointments = asyncHandler(async (req, res) => {
   });
 });
 
-exports.createAppointment = asyncHandler(async (req, res) => {
+exports.createAppointment = asyncHandler(async (req, res) => { //admin
   const appointment = await Appointment.create({
     patient: req.body.patient,
     doctor: req.body.doctor,
     timeSlot: req.body.timeSlot,
-    diagnosis: req.body.diagnosis,
-    createdBy: req.body.createdBy,
-    notes: req.body.notes,
+    createdBy: req.user.id,
   });
   res.status(201).json({
     status: "success",
     data: appointment,
   });
+});
+
+exports.addTestResultToAppointment = asyncHandler(async (req, res) => {
+  const appointment = await Appointment.findById(req.params.id);
+  appointment.testResult.push(req.body.testResultId);
+  await appointment.save()
+});
+
+exports.completeAppointment = asyncHandler(async (req, res, next) => { // Doctor runs disgnosis and orders test if need be
+  const appointment 
 });
 

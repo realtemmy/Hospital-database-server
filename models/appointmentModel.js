@@ -27,8 +27,15 @@ const appointmentSchema = new mongoose.Schema(
     diagnosis: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Diagnosis",
-      required: [true, "Diagnosis must be specified for the appointment"],
+      // required: [true, "Diagnosis must be specified for the appointment"],
     },
+    testResult: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TestResult",
+        testType: String,
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Tracks the admin/doctor/nurse who created the appointment
