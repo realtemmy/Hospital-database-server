@@ -22,10 +22,12 @@ const diagnosisSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    treatment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Treatment",
-    },
+    treatments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Treatment",
+      },
+    ],
     notes: {
       type: String,
       trim: true,
@@ -35,3 +37,7 @@ const diagnosisSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+const Diagnosis = mongoose.model("Diagnosis", diagnosisSchema);
+
+module.exports = Diagnosis;
