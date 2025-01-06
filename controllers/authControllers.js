@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const User = require("./../models/userModel");
 const Patient = require("./../models/patientModel");
 const asyncHandler = require("express-async-handler");
+const Physician = require("../models/physicianModel");
+
 const jwt = require("jsonwebtoken");
 
 const signToken = (id) => {
@@ -70,6 +72,33 @@ exports.login = asyncHandler(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.googleAuth = asyncHandler(async (req, res, next) => {
+  const { token } = req.body;
+  const userData = await verifyGoogleToken(token);
+
+  let user = await User.findOne({ email: userData.email });
+
+  if (!user) {
+    user = new User({
+      //   name: userData.given_name,
+      //   email: userData.email,
+      //   photo: userData.picture,
+    });
+    user.save({ validateBeforeSave: false });
+
+    await Patient.create({
+      user: newUser._id,
+    });
+    createSendToken(user, 201, res);
+  }
+  await Patient.create({
+    user: newUser._id,
+  });
+
+  // 3) allow login, send jwt, response etc
+  createSendToken(user, 200, res);
+});
+
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) check if there's a token
   let token;
@@ -112,6 +141,19 @@ exports.protect = asyncHandler(async (req, res, next) => {
   next();
 });
 
+exports.physicianSpecialization = asyncHandler(async (req, res, next) => {
+  const specializations = ["Doctor", "Pharmacist", "Nurse", "Radiologist"]
+  // 1) Get physician from userId
+  const physician = Physician.findOne({ user: req.user.id });
+  // 2) Check if physician specialization matches
+  if(!specializations.includes(physician.specialization)){
+    return next(
+      new AppError("You do not have access to perform this action", 403)
+    );
+  }
+  
+});
+
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles [patient, physician, admin]
@@ -124,27 +166,6 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
-
-exports.googleAuth = asyncHandler(async (req, res, next) => {
-  const { token } = req.body;
-  const userData = await verifyGoogleToken(token);
-
-  let user = await User.findOne({ email: userData.email });
-
-  if (!user) {
-    user = new User({
-      //   name: userData.given_name,
-      //   email: userData.email,
-      //   photo: userData.picture,
-    });
-    user.save({ validateBeforeSave: false });
-
-    createSendToken(user, 201, res);
-  }
-
-  // 3) allow login, send jwt, response etc
-  createSendToken(user, 200, res);
-});
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // Get user based on POSTed email

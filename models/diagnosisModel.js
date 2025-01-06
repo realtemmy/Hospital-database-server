@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { path } = require("../app");
 
 const diagnosisSchema = new mongoose.Schema(
   {
@@ -37,6 +38,17 @@ const diagnosisSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+diagnosisSchema.pre(/^find/, function(){
+  return this.populate({
+    path: "patient",
+    select: "name email"
+  })
+});
+
+diagnosisSchema.pre("save", function(next) {
+  // check if user is a 
+})
 
 const Diagnosis = mongoose.model("Diagnosis", diagnosisSchema);
 

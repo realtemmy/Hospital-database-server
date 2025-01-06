@@ -13,22 +13,8 @@ const patientSchema = new mongoose.Schema(
     },
     medicalHistory: [
       {
-        condition: String,
-        dateDiagnosed: Date,
-        status: {
-          type: String,
-          enum: {
-            values: ["ongoing", "resolved"],
-            message: "{VALUE} is not supported",
-          },
-          default: "ongoing",
-        },
-        resolvedDate: Date,
-        assignedDoctor: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Physician",
-        },
-        note: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "MedicalHistory",
       },
     ],
     bloodGroup: {

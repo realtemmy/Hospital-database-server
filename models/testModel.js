@@ -41,6 +41,6 @@ testSchema.pre("save", function (next) {
   next();
 });
 
-const TestResults = mongoose.model("TestResults", testSchema);
+const Test = mongoose.model("TestResults", testSchema);
 
-module.exports = TestResults;
+module.exports = Test;

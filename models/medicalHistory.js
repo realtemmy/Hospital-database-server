@@ -6,7 +6,10 @@ const medicalHistorySchema = new mongoose.Schema(
     patient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
-      required: true,
+      required: [true, "Patiant data is required for diagnosis"],
+    },
+    condition: {
+      type: string,
     },
     status: {
       type: String,

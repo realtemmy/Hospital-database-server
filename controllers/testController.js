@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const TestResults = require("./../models/testModel");
+const Test = require("./../models/testModel");
 const Appointment = require("./../models/appointmentModel");
 
 exports.getAllTests = asyncHandler(async (req, res) => {
@@ -10,8 +10,16 @@ exports.getAllTests = asyncHandler(async (req, res) => {
   });
 });
 
+exports.getUserTests = asyncHandler(async (req, res) => {
+  const tests = await Test.find({ patient: req.params.patientId });
+  res.status(200).json({
+    status: "success",
+    data: tests,
+  });
+});
+
 exports.createTest = asyncHandler(async (req, res) => {
-  const test = await TestResults.create({
+  const test = await Test.create({
     patient: req.body.patient,
     doctor: req.user._id,
     category: req.body.category,
