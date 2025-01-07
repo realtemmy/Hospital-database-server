@@ -9,7 +9,7 @@ const medicalHistorySchema = new mongoose.Schema(
       required: [true, "Patiant data is required for diagnosis"],
     },
     condition: {
-      type: string,
+      type: String,
     },
     status: {
       type: String,

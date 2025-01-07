@@ -6,6 +6,9 @@ const compression = require("compression");
 
 dotenv.config({ path: "./config.env" });
 
+const AppError = require("./utils/appError");
+const globalErrorHandler = require("./controllers/errorController");
+
 const app = express();
 
 // Steps
@@ -19,12 +22,14 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(compression());
 
-
 // ================ Routes Middlewares ======================
+const userRoutes = require("./routes/userRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
 
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/appointment", appointmentRoutes);
 
 // ================= All undefined routes ===================
-
 app.use("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
@@ -33,4 +38,3 @@ app.use("*", (req, res, next) => {
 app.use(globalErrorHandler);
 
 module.exports = app;
-

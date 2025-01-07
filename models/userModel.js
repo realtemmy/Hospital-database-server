@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema({
       values: ["Patient", "Physician", "Admin"],
       message: "{VALUE} is not supported as a user role",
     },
+    default: "Patient",
   },
   photo: String,
   phone: {
@@ -53,7 +54,7 @@ const userSchema = new mongoose.Schema({
       values: ["male", "female"],
       message: "{value} for gender is not supported",
     },
-    required: [true, "Patient must provide gender"],
+    required: [true, "User must provide gender"],
   },
   dateOfBirth: {
     type: Date,

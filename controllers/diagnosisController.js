@@ -4,10 +4,11 @@ const MedicalHistory = require("./../models/medicalHistory");
 const Treatment = require("./../models/treatmentModel");
 
 exports.createDiagnosis = asyncHandler(async (req, res) => {
+  const appointmentId = req.params.appointmentId || req.body.appointmentId;
   const diagnosis = await Diagnosis.create({
     patient: req.body.patientId,
     doctor: req.user.id,
-    appointment: req.body.appointment,
+    appointment: appointmentId,
     symptoms: req.body.symptoms,
     notes: req.body.notes, // set an object in treatment
   });

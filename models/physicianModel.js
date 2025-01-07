@@ -19,7 +19,7 @@ const physicianSchema = new mongoose.Schema({
   },
   licenseNumber: {
     type: Number,
-    required: [true, "License number is required."],
+    // required: [true, "License number is required."],
   },
   yearsOfExperience: {
     type: Number,

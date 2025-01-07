@@ -1,11 +1,15 @@
 const asyncHandler = require("express-async-handler");
 const Appointment = require("../models/appointmentModel");
 const MedicalHistory = require("./../models/medicalHistory");
+const AppError = require("./../utils/appError");
+
+const { parse } = require("date-fns");
 
 exports.getAllAppointments = asyncHandler(async (req, res) => {
-  const appointments = await Appointment.find({});
+  const appointments = await Appointment.find();
   res.status(200).json({
     status: "success",
+    length: appointments.length,
     data: appointments,
   });
 });
@@ -17,6 +21,7 @@ exports.getUserAppointments = asyncHandler(async (req, res) => {
   });
   res.status(200).json({
     status: "success",
+    length: appointments.length,
     data: appointments,
   });
 });
@@ -31,10 +36,16 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
 
 exports.createAppointment = asyncHandler(async (req, res) => {
   //admin
+  const parsedDate = parse(req.body.timeSlot, "hha, MMM do, yyyy", new Date());
+  console.log(typeof parsedDate);
+
+  if (isNaN(parsedDate)) {
+    throw new AppError("Invalid date format. Use '3am, May 26th, 2025", 400);
+  }
   const appointment = await Appointment.create({
+    physician: req.body.physician,
     patient: req.body.patient,
-    doctor: req.body.doctor,
-    timeSlot: req.body.timeSlot,
+    timeSlot: parsedDate,
     createdBy: req.user.id,
   });
 
@@ -57,9 +68,10 @@ exports.completeAppointment = asyncHandler(async (req, res, next) => {
     }
   );
 
-  const history = await MedicalHistory.findOne({ diagnosis: appointment.diagnosis });
-  history.status = "resolved"
-
+  const history = await MedicalHistory.findOne({
+    diagnosis: appointment.diagnosis,
+  });
+  history.status = "resolved";
 
   res.status(200).json({
     status: "success",

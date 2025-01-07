@@ -3,7 +3,7 @@ const User = require("./../models/userModel");
 const Patient = require("./../models/patientModel");
 const asyncHandler = require("express-async-handler");
 const Physician = require("../models/physicianModel");
-
+const AppError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
 
 const signToken = (id) => {
@@ -45,11 +45,18 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
     role: req.body.role,
+    gender: req.body.gender,
   });
 
-  await Patient.create({
-    user: newUser._id,
-  });
+  if(req.body.role === "Physician") {
+    await Physician.create({
+      user: newUser._id,
+    });
+  }else{
+    await Patient.create({
+      user: newUser._id,
+    });
+  }
 
   createSendToken(newUser, 201, res);
 });
@@ -139,19 +146,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
   // Grant accessto route
   req.user = currentUser;
   next();
-});
-
-exports.physicianSpecialization = asyncHandler(async (req, res, next) => {
-  const specializations = ["Doctor", "Pharmacist", "Nurse", "Radiologist"]
-  // 1) Get physician from userId
-  const physician = Physician.findOne({ user: req.user.id });
-  // 2) Check if physician specialization matches
-  if(!specializations.includes(physician.specialization)){
-    return next(
-      new AppError("You do not have access to perform this action", 403)
-    );
-  }
-  
 });
 
 exports.restrictTo = (...roles) => {
