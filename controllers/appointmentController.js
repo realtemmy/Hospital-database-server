@@ -68,11 +68,6 @@ exports.completeAppointment = asyncHandler(async (req, res, next) => {
     }
   );
 
-  const history = await MedicalHistory.findOne({
-    diagnosis: appointment.diagnosis,
-  });
-  history.status = "resolved";
-
   res.status(200).json({
     status: "success",
     data: appointment,

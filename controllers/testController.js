@@ -3,9 +3,10 @@ const Test = require("./../models/testModel");
 const Appointment = require("./../models/appointmentModel");
 
 exports.getAllTests = asyncHandler(async (req, res) => {
-  const tests = await TestResults.find();
+  const tests = await Test.find();
   res.status(200).json({
     status: "success",
+    length: tests.length,
     data: tests,
   });
 });
@@ -19,15 +20,16 @@ exports.getUserTests = asyncHandler(async (req, res) => {
 });
 
 exports.createTest = asyncHandler(async (req, res) => {
+  const appointmentId = req.params.appointmentId || req.body.appointment;
   const test = await Test.create({
     patient: req.body.patient,
-    doctor: req.user._id,
+    physician: req.user._id,
     category: req.body.category,
     name: req.body.name,
     resultValue: req.body.resultValue,
     image: req.body.image,
     interpretation: req.body.interpretation,
-    appointment: req.params.appointmentId,
+    appointment: appointmentId,
   });
 
   await Appointment.findByIdAndUpdate(req.params.appointmentId, {

@@ -68,7 +68,7 @@ appointmentSchema.pre("save", async function (next) {
     
     const physician = await Physician.findOne({ user: string });
     if (!physician) {
-      return next(new AppError("Physician does not exist", 404));
+      return next(new AppError("User is not a physician", 401));
     }
 
     // Check for conflicting appointments with the same physician

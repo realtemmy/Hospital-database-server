@@ -1,11 +1,14 @@
 const express = require("express");
 const diagnosisRoutes = require("./diagnosisRoutes");
+const testRoutes = require("./testRoutes");
 
 const authController = require("./../controllers/authControllers");
 const appointmentController = require("./../controllers/appointmentController");
 
 const router = express.Router();
 
+
+router.use("/:appointmentId/test", testRoutes);
 router.use("/:appointmentId/diagnosis", diagnosisRoutes);
 
 router.get(

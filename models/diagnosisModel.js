@@ -1,16 +1,17 @@
 const mongoose = require("mongoose");
-const { path } = require("../app");
+const Physician = require("./physicianModel");
+const AppError = require("./../utils/appError");
 
 const diagnosisSchema = new mongoose.Schema(
   {
     patient: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Patient",
+      ref: "User",
       required: [true, "Patient must be specified for the diagnosis"],
     },
-    doctor: {
+    physician: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Physician",
+      ref: "User",
       required: [true, "Doctor must be specified for the diagnosis"],
     },
     appointment: {
@@ -29,7 +30,7 @@ const diagnosisSchema = new mongoose.Schema(
         ref: "Treatment",
       },
     ],
-    notes: {
+    note: {
       type: String,
       trim: true,
     },
@@ -39,16 +40,17 @@ const diagnosisSchema = new mongoose.Schema(
   }
 );
 
-diagnosisSchema.pre(/^find/, function(){
-  return this.populate({
-    path: "patient",
-    select: "name email"
-  })
-});
+diagnosisSchema.pre("save", async function (next) {
+  // Check if physician exists or is an actual physician
+  // Check if specialization is doctor?
+  const string = this.physician.toString();
+  const physician = await Physician.findOne({ user: string });
+  if (!physician) {
+    return next(new AppError("User is not a physician", 401));
+  }
 
-diagnosisSchema.pre("save", function(next) {
-  // check if user is a 
-})
+  next();
+});
 
 const Diagnosis = mongoose.model("Diagnosis", diagnosisSchema);
 

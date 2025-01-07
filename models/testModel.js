@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
+const Physician = require("./physicianModel");
+const AppError = require("./../utils/appError");
 
 const testSchema = new mongoose.Schema({
   patient: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Patient",
+    ref: "User",
     required: [true, "Patient is required"],
   },
-  doctor: {
+  physician: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Physician", // Radiologist or lab scientist only
+    ref: "User", // Radiologist or lab scientist only
     required: [true, "Physician is required"],
   },
   name: {
@@ -22,7 +24,7 @@ const testSchema = new mongoose.Schema({
   },
   category: {
     type: String, // eg Blood chemistry, hematology, microbiology, immunology,
-    required: [true, "Category is required"],
+    required: [true, "Category is required for tests"],
   },
   resultValue: {
     type: String,
@@ -38,6 +40,13 @@ const testSchema = new mongoose.Schema({
 
 testSchema.pre("save", function (next) {
   // if the physician type is not radiologist or lab scientist, throw error
+  // for now, confirm user is a physician
+  const string = this.physician.toString();
+  const physician = Physician.findOne({ user: string });
+  if (!physician) {
+    return next(new AppError("User is not a physician", 401));
+  }
+
   next();
 });
 
