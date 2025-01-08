@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// virtual populate medical history
 const patientSchema = new mongoose.Schema(
   {
     user: {
@@ -11,12 +12,6 @@ const patientSchema = new mongoose.Schema(
     bloodType: {
       type: String,
     },
-    medicalHistory: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "MedicalHistory",
-      },
-    ],
     bloodGroup: {
       type: String,
       enum: ["A", "B", "AB", "O"],
@@ -26,32 +21,6 @@ const patientSchema = new mongoose.Schema(
       enum: ["AA", "AS", "AC", "SS", "CC", "SC"],
     },
     allergies: [String],
-    medications: [
-      {
-        name: String,
-        dosage: String,
-        startDate: Date,
-        endDate: Date,
-        assignedPhysician: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Physician",
-        },
-        note: String,
-      },
-    ],
-    //   treatmentPlan
-    testResults: [
-      {
-        title: String,
-        image: String,
-        date: Date,
-        hospital: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Hospital",
-        },
-        physician: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //A radiologist or lab scientist here
-      },
-    ],
     appointments: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -62,30 +31,18 @@ const patientSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    surgeries: [
-      {
-        surgeryType: String,
-        leadSurgeon: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // Doctor/Surgeon
-        },
-        otherPhysicians: [
-          {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            role: String, //Eg first assistant, nurse, aeste..(that put you to sleep sha)
-          },
-        ],
-        startDate: Date,
-        endDate: Date,
-      },
-    ],
     insurance: {
       name: String,
     },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+patientSchema.virtual("medicalHistory", {
+  ref: "MedicalHistory",
+  foreignField: "patient",
+  localField: "_id",
+});
 
 const Patient = mongoose.model("Patient", patientSchema);
 

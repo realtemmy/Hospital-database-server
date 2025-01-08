@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const AppError = require("../utils/appError");
 
 const treatmentSchema = new mongoose.Schema(
   {
@@ -12,20 +13,51 @@ const treatmentSchema = new mongoose.Schema(
       ref: "Physician",
       required: [true, "Doctor must be specified for the treatment"],
     },
-    name: {
+    plan: {
       type: String,
-      required: [true, "Treatment name is mandatory"],
+      required: [true, "Treatment plan is mandatory"],
     },
-    type: {
+    diagnosis: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Diagnosis",
+      required: [true, "Diagnosis must be specified for the treatment"],
+    },
+    mode: {
       type: String,
-      enum: ["medication", "surgery", "therapy"],
+      enum: {
+        values: ["medication", "surgery", "therapy", "counselling"],
+        message:
+          "Treatment type must be either medication, surgery, therapy or counselling",
+      },
       default: "medication",
     },
     dosage: { type: String },
     frequency: { type: String },
     details: { type: String, required: true },
     sideEffects: [String],
-    notes: {
+    startDate: { type: Date, default: Date.now },
+    endDate: Date,
+    // If mode is surgery, then surgery details must be provided
+    surgery: [
+      {
+        surgeryType: String,
+        leadSurgeon: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User", // Doctor/Surgeon
+        },
+        otherPhysicians: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            role: String, //Eg first assistant, nurse, aeste..(that put you to sleep sha)
+          },
+        ],
+        startDate: Date,
+        endDate: Date,
+      },
+    ],
+
+    note: {
       type: String,
       trim: true,
     },
@@ -34,6 +66,19 @@ const treatmentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// treatmentSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: ""
+//   });
+// });
+// treatmentSchema.pre("save", function (next) {
+//   // if mode is surgery, then surgery details must be provided
+//   if (this.mode === "surgery" && this.surgery.length === 0) {
+//     return next(new AppError("Surgery details must be provided", 400));
+//   }
+//   next();
+// });
 
 const Treatment = mongoose.model("Treatment", treatmentSchema);
 

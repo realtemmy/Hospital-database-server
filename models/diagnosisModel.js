@@ -24,21 +24,24 @@ const diagnosisSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    treatments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Treatment",
-      },
-    ],
     note: {
       type: String,
       trim: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+diagnosisSchema.virtual("treatments", {
+  ref: "Treatment",
+  foreignField: "diagnosis",
+  localField: "_id",
+});
+
+diagnosisSchema.pre(/^find/, function (next) {
+  this.populate({path: "treatments", select: "plan dosage mode frequency note "});
+  next();
+});
 
 diagnosisSchema.pre("save", async function (next) {
   // Check if physician exists or is an actual physician

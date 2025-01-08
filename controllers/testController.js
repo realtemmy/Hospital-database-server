@@ -32,11 +32,6 @@ exports.createTest = asyncHandler(async (req, res) => {
     appointment: appointmentId,
   });
 
-  await Appointment.findByIdAndUpdate(req.params.appointmentId, {
-    $push: {
-      testResults: test._id,
-    },
-  });
 
   res.status(201).json({
     status: "success",

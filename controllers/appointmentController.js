@@ -37,7 +37,6 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
 exports.createAppointment = asyncHandler(async (req, res) => {
   //admin
   const parsedDate = parse(req.body.timeSlot, "hha, MMM do, yyyy", new Date());
-  console.log(typeof parsedDate);
 
   if (isNaN(parsedDate)) {
     throw new AppError("Invalid date format. Use '3am, May 26th, 2025", 400);

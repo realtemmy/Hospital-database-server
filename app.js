@@ -18,7 +18,7 @@ const app = express();
 // under diagnosis, doctor might order a test and based on result of the test gives a treatment plan
 // patient is treated
 // appointmennt is marked complete does't mean nedical history is complete
-// When is medical history complete?
+// When is medical history complete? maybe when treatment is completed or when it ends
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(compression());
@@ -28,11 +28,13 @@ const userRoutes = require("./routes/userRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const diagnosisRoutes = require("./routes/diagnosisRoutes");
 const testRoutes = require("./routes/testRoutes");
+const treatmentRoutes = require("./routes/treatmentRoutes");
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/appointment", appointmentRoutes);
 app.use("/api/v1/diagnosis", diagnosisRoutes);
 app.use("/api/v1/test", testRoutes);
+app.use("/api/v1/treatment", treatmentRoutes);
 
 // ================= All undefined routes ===================
 app.use("*", (req, res, next) => {

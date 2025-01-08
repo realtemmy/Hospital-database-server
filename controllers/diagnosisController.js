@@ -1,7 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Diagnosis = require("./../models/diagnosisModel");
 const MedicalHistory = require("./../models/medicalHistory");
-const Treatment = require("./../models/treatmentModel");
 const Appointment = require("./../models/appointmentModel");
 const AppError = require("./../utils/appError");
 
@@ -25,6 +24,7 @@ exports.createDiagnosis = asyncHandler(async (req, res) => {
     note: req.body.note,
   });
 
+  // When deleting an appointment, the diagnosis should also be deleted
   await MedicalHistory.create({
     patient: req.body.patient,
     diagnosis: diagnosis._id,
@@ -44,32 +44,7 @@ exports.createDiagnosis = asyncHandler(async (req, res) => {
   });
 });
 
-exports.registerTreatment = asyncHandler(async (req, res, next) => {
-  const treatment = await Treatment.create({
-    patient: req.body.patient,
-    physician: req.user._id,
-    name: req.body.name,
-    dosage: req.body.dosage,
-    frequency: req.body.freq,
-    details: req.body.details,
-    sideEffects: req.body.sideEffects,
-    type: req.body.type,
-    notes: req.body.notes,
-  });
 
-  await Diagnosis.findByIdAndUpdate(
-    req.params.diagnosisId,
-    {
-      $push: {
-        treatments: treatment._id,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-});
 
 exports.deleteDiagnosis = asyncHandler(async (req, res, next) => {
   // Only the doctor that created can delete

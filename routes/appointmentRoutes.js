@@ -11,6 +11,10 @@ const router = express.Router();
 router.use("/:appointmentId/test", testRoutes);
 router.use("/:appointmentId/diagnosis", diagnosisRoutes);
 
+// Active appointments
+// Edit appointment date
+// Cancel appointment as a user and missed appointment after 24 hours of due date
+
 router.get(
   "/user",
   authController.protect,

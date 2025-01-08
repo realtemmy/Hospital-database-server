@@ -32,16 +32,6 @@ const appointmentSchema = new mongoose.Schema(
       },
       default: "scheduled",
     },
-    diagnosis: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Diagnosis",
-    },
-    testResults: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "TestResult",
-      },
-    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -52,20 +42,41 @@ const appointmentSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 // Index for optimized querying
 appointmentSchema.index({ physician: 1, timeSlot: 1 });
+
+appointmentSchema.virtual("diagnosis", {
+  ref: "Diagnosis",
+  foreignField: "appointment",
+  localField: "_id",
+});
+appointmentSchema.virtual("tests", {
+  ref: "Test",
+  foreignField: "appointment",
+  localField: "_id",
+});
+
+appointmentSchema.pre(/^find/, function (next) {
+  this.populate({ path: "diagnosis", select: "symptoms note" }); // Automatically populate the virtual
+  next();
+});
+appointmentSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "tests",
+    select: "name category interpretation -appointment",
+  }); // Automatically populate the virtual
+  next();
+});
 
 appointmentSchema.pre("save", async function (next) {
   try {
     // Check if physician exists
     const objectId = this.physician;
     const string = objectId.toString();
-    
+
     const physician = await Physician.findOne({ user: string });
     if (!physician) {
       return next(new AppError("User is not a physician", 401));
