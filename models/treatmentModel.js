@@ -8,10 +8,19 @@ const treatmentSchema = new mongoose.Schema(
       ref: "Patient",
       required: [true, "Patient must be specified for the treatment"],
     },
+
     physician: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Physician",
       required: [true, "Doctor must be specified for the treatment"],
+    },
+    type: {
+      type: String,
+      enum: {
+        values: ["in-patient", "out-patient"],
+        message: "Supported treatment types include: In and Out patients",
+      },
+      default: "out-patient",
     },
     plan: {
       type: String,
@@ -37,7 +46,7 @@ const treatmentSchema = new mongoose.Schema(
     sideEffects: [String],
     startDate: { type: Date, default: Date.now },
     endDate: Date,
-    // If mode is surgery, then surgery details must be provided
+    // If mode is surgery, then surgery details must be provided, also add scheduled date etc
     surgery: [
       {
         surgeryType: String,
