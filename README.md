@@ -1,5 +1,7 @@
-## Project setup
-### User roles
+# Project setup
+
+## User roles
+
 - Administration
 - Doctor/Physician
 - Nurse
@@ -7,6 +9,7 @@
 - Patient
 
 ### Main interfaces / Features
+
 - Login / Authentication
 - Patient registration
 - Dashboard
@@ -16,8 +19,8 @@
 - Billings and insurance
 - Report and analytics
 
-
 ### Patient profile
+
 - Personal details
 - Medical history
 - Allergies and sensitivities
@@ -27,6 +30,7 @@
 - Appointment history
 
 ### Medical records
+
 - Document management (upload and view)
 - Lab results
 - Imaging
@@ -34,11 +38,11 @@
 - Vital signs tracking
 
 ### Appointment scheduling
+
 - Calender view (check doctor's calender and appointments)
 - Schedule appointment
 - View available time slot
 - Patient notification (sms, email etc)
-
 
 ## Roles and Permissions
 
