@@ -38,8 +38,14 @@ const hospitalSchema = new mongoose.Schema(
       {
         roomNumber: {
           type: String,
-          required: [true, "Room number is required"],
+          required: true,
           trim: true,
+          validate: {
+            validator: function (value) {
+              return !this.rooms.some((room) => room.roomNumber === value);
+            },
+            message: "Room number must be unique within the hospital",
+          },
         },
         roomType: {
           type: String,
@@ -54,7 +60,6 @@ const hospitalSchema = new mongoose.Schema(
         },
         capacity: {
           type: Number,
-          required: [true, "Room capacity is required"],
         },
         isOccupied: {
           type: Boolean,
@@ -70,7 +75,7 @@ const hospitalSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-hospitalSchema.index({ _id: 1, "rooms.roomNumber": 1 }, { unique: true });
+// hospitalSchema.index({ _id: 1, "rooms.roomNumber": 1 }, { unique: true });
 
 // Virtual to get the total number of rooms in the hospital
 hospitalSchema.virtual("totalRooms").get(function () {
