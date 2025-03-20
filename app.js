@@ -13,14 +13,17 @@ const app = express();
 
 // Steps
 // appointment is booked by a patient/hospital admin
-// appointment is confirmed by the doctor
-// patient is diagnosed by the doctor
+// appointment is confirmed by the doctor, nahh hospital admin .. maybe admin assignes a doctor also to patient
+// patient is diagnosed by a doctor
 // under diagnosis, doctor might order a test and based on result of the test gives a treatment plan
 // patient is treated
 // appointmennt is marked complete does't mean nedical history is complete
 // When is medical history complete? maybe when treatment is completed or when it ends
+
+//  ============= Hospital ================ //
+// In and out patients, hospital receptionists/admin
 app.use(cors({ origin: "*" }));
-app.use(express.json());
+app.use(express.json());   
 app.use(compression());
 
 // ================ Routes Middlewares ======================

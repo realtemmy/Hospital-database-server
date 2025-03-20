@@ -27,6 +27,11 @@ const hospitalSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    departments: [
+      {
+        type: String,
+      },
+    ],
     // Array of laboratories associated with the hospital
     // laboratories: [
     //   {

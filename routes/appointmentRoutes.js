@@ -7,18 +7,36 @@ const appointmentController = require("./../controllers/appointmentController");
 
 const router = express.Router();
 
-
 router.use("/:appointmentId/test", testRoutes);
 router.use("/:appointmentId/diagnosis", diagnosisRoutes);
 
-// Active appointments
-// Edit appointment date
-// Cancel appointment as a user and missed appointment after 24 hours of due date
+//  ============== Steps ================= //
+// 1. Create a new appointment
+// 2. Admin confirms and appoint doctor to the appointment
+// 3. Doctor completes the appointment
+// 4. User cancelles the appointment
+// 5. User does not show up for the appointment
+// 6. User reschedules the appointment
+
+router.route("/:id").get(appointmentController.getAppointment);
 
 router.get(
   "/user",
   authController.protect,
   appointmentController.getUserAppointments
+);
+
+router.route("/").get(appointmentController.getAllAppointments).post(
+  authController.protect,
+  // authController.restrictTo("Admin", "Patient"),
+  appointmentController.createAppointment
+);
+
+router.patch(
+  "/:id/confirm",
+  authController.protect,
+  authController.restrictTo("admin"),
+  appointmentController.confirmAppointment
 );
 
 router.patch(
@@ -28,21 +46,11 @@ router.patch(
   appointmentController.completeAppointment
 );
 
-router
-  .route("/")
-  .get(appointmentController.getAllAppointments)
-  .post(
-    authController.protect,
-    authController.restrictTo("Admin", "Patient"),
-    appointmentController.createAppointment
-  );
-
-//   Only physician and admin should be able to edit
-router.route("/:id").get(appointmentController.getAppointment);
-//   .patch(
-//     authController.protect,
-//     authController.restrictTo("Physician"),
-//     appointmentController.completeAppointment()
-//   );
+router.patch("/:id/cancel", appointmentController.cancelAppointment);
+router.patch(
+  "/:id/reschedule",
+  authController.restrictTo("admin"),
+  appointmentController.rescheduleAppointment
+);
 
 module.exports = router;

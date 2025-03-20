@@ -12,11 +12,11 @@ const appointmentSchema = new mongoose.Schema(
     physician: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Physician must be specified for the appointment"],
+      // required: [true, "Physician must be specified for the appointment"],
     },
     timeSlot: {
       type: Date,
-      required: [true, "Time slot for appointment is required."],
+      // required: [true, "Time slot for appointment is required."],
       validate: {
         validator: function (value) {
           return value > Date.now();
@@ -27,7 +27,7 @@ const appointmentSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["scheduled", "completed", "cancelled", "no-show"],
+        values: ["scheduled", "confirmed", "completed", "cancelled", "no-show"],
         message: "{VALUE} is not supported",
       },
       default: "scheduled",
@@ -123,6 +123,8 @@ appointmentSchema.pre("save", async function (next) {
     next(err);
   }
 });
+
+// if after timeslot date is passed, appointment is no-show
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 

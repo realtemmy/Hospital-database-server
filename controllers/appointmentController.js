@@ -42,7 +42,7 @@ exports.createAppointment = asyncHandler(async (req, res) => {
     throw new AppError("Invalid date format. Use '3am, May 26th, 2025", 400);
   }
   const appointment = await Appointment.create({
-    physician: req.body.physician,
+    // physician: req.body.physician,
     patient: req.body.patient,
     timeSlot: parsedDate,
     createdBy: req.user.id,
@@ -54,12 +54,80 @@ exports.createAppointment = asyncHandler(async (req, res) => {
   });
 });
 
+exports.confirmAppointment = asyncHandler(async (req, res, next) => {
+  //admin
+  const appointment = await Appointment.findByIdAndUpdate(
+    req.params.id,
+    {
+      status: "confirmed",
+      timeSlot: req.body.timeSlot,
+      physician: req.body.physician,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  // after appointment is set, send email or sms to patient
+
+  res.status(200).json({
+    status: "success",
+    data: appointment,
+  });
+});
+
 exports.completeAppointment = asyncHandler(async (req, res, next) => {
   // Doctor runs disgnosis and orders test if need be
   const appointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     {
       status: "completed",
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    status: "success",
+    data: appointment,
+  });
+});
+
+// User cancels appointment
+exports.cancelAppointment = asyncHandler(async (req, res, next) => {
+  // Confirm if user is the one who created the appointment
+  const app = await Appointment.findById(req.params.id);
+  if (app.createdBy.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new AppError("You are not allowed to cancel this appointment", 401)
+    );
+  }
+  const appointment = await Appointment.findByIdAndUpdate(
+    req.params.id,
+    {
+      status: "cancelled",
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  // Send email or sms to patient
+
+  res.status(200).json({
+    status: "success",
+    data: appointment,
+  });
+});
+
+exports.rescheduleAppointment = asyncHandler(async (req, res, next) => {
+  const appointment = await Appointment.findByIdAndUpdate(
+    req.params.id,
+    {
+      timeSlot: req.body.timeSlot,
     },
     {
       new: true,

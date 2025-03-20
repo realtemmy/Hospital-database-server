@@ -76,6 +76,8 @@ const treatmentSchema = new mongoose.Schema(
   }
 );
 
+// check if user is a verified surgeon or doctor
+
 // treatmentSchema.pre(/^find/, function (next) {
 //   this.populate({
 //     path: ""

@@ -45,6 +45,9 @@ exports.createHospital = asyncHandler(async (req, res, next) => {
 
 exports.addRoomsToHospital = asyncHandler(async (req, res, next) => {
   // rooom - roomNumber, type, capacity
+  if (!req.params.hospitalId) {
+    return next(new AppError("No hospital ID", 400));
+  }
   const hospital = await Hospital.findByIdAndUpdate(
     req.params.hospitalId,
     {
@@ -59,6 +62,10 @@ exports.addRoomsToHospital = asyncHandler(async (req, res, next) => {
     { new: true, runValidators: true }
   );
 
+  if (!hospital) {
+    return next(new AppError("No hospital with ID found", 404));
+  }
+
   res.status(200).json({
     status: "success",
     data: hospital,
@@ -67,18 +74,21 @@ exports.addRoomsToHospital = asyncHandler(async (req, res, next) => {
 
 exports.assignRoom = asyncHandler(async (req, res, next) => {
   const { roomNumber, patientId } = req.body;
-  const hospital = await Hospital.findOneAndUpdate({
-    _id: req.params.id,
-    "rooms.roomNumber": roomNumber,
-    "rooms.isOccupied": false,
-  }, {
-    $set: {
-      "rooms.$.isOccupied": true,
-      "rooms.$.patient": patientId,
+  const hospital = await Hospital.findOneAndUpdate(
+    {
+      _id: req.params.id,
+      "rooms.roomNumber": roomNumber,
+      "rooms.isOccupied": false,
     },
-  });
-  if(!hospital) {
-    return next(new AppError("Room is not available.", 400)); //Room is already occupied or not found
+    {
+      $set: {
+        "rooms.$.isOccupied": true,
+        "rooms.$.patient": patientId,
+      },
+    }
+  );
+  if (!hospital) {
+    return next(new AppError("Room is not available.", 401)); //Room is already occupied or not found
   }
   res.status(200).json({
     status: "success",
@@ -87,15 +97,18 @@ exports.assignRoom = asyncHandler(async (req, res, next) => {
 });
 
 exports.unassignRoom = asyncHandler(async (req, res, next) => {
-  const hospital = await Hospital.findOneAndUpdate({
-    _id: req.params.id,
-    "rooms.patient": req.body.patientId,
-  }, {
-    $set: {
-      "rooms.$.isOccupied": false,
-      "rooms.$.patient": null,
+  const hospital = await Hospital.findOneAndUpdate(
+    {
+      _id: req.params.id,
+      "rooms.patient": req.body.patientId,
     },
-  });
+    {
+      $set: {
+        "rooms.$.isOccupied": false,
+        "rooms.$.patient": null,
+      },
+    }
+  );
   res.status(200).json({
     status: "success",
     data: hospital,
