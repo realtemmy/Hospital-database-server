@@ -22,6 +22,14 @@ const app = express();
 
 //  ============= Hospital ================ //
 // In and out patients, hospital receptionists/admin
+
+
+// ========= Files and storage ================ //
+// File formats: 
+// - Text/document files eg CSV, PDF, DOCS - Google cloud storage or Firebase or AWS
+// - Images and videos - Cloudinary
+
+
 app.use(cors({ origin: "*" }));
 app.use(express.json());   
 app.use(compression());
