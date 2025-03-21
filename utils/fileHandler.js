@@ -9,9 +9,9 @@ cloudinary.config({
 });
 
 const s3 = new AWS.S3({
-  endpoint: "https://s3.us-east-005.backblazeb2.com", // Replace with your endpoint
-  accessKeyId: "0052d4ccb11af9a0000000002", // Replace with your Key ID
-  secretAccessKey: "K0055ckqWqwbGzaa0eKeBlCyxp2gR8I", // Replace with your Application Key
+  endpoint: process.env.BACKBLAZE_ENDPOINT, // Replace with your endpoint
+  accessKeyId: process.env.BACKBLAZE_KEYID, // Replace with your Key ID
+  secretAccessKey: process.env.BACKBLAZE_APPLICATION_KEY, // Replace with your Application Key
   region: "us-west-001", // Replace with your region
   s3ForcePathStyle: true, // Required for Backblaze B2
 });
