@@ -39,8 +39,6 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signUp = asyncHandler(async (req, res, next) => {
-  // Create user and then create patient
-  // If role is admin
 
   const newUser = await User.create({
     firstName: req.body.firstName,
@@ -69,7 +67,6 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     if (!hospital) {
       return next(new AppError("No hospital with ID found", 404));
     }
-    hospital;
   }
 
   createSendToken(newUser, 201, res);
@@ -112,9 +109,6 @@ exports.googleAuth = asyncHandler(async (req, res, next) => {
     });
     createSendToken(user, 201, res);
   }
-  await Patient.create({
-    user: newUser._id,
-  });
 
   // 3) allow login, send jwt, response etc
   createSendToken(user, 200, res);

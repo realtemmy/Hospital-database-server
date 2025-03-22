@@ -36,16 +36,23 @@ diagnosisSchema.virtual("treatments", {
   ref: "Treatment",
   foreignField: "diagnosis",
   localField: "_id",
+  options: function () {
+    return {
+      match: { patient: this.patient },
+    };
+  },
 });
 
-diagnosisSchema.pre(/^find/, function (next) {
-  this.populate({path: "treatments", select: "plan dosage mode frequency note "});
-  next();
-});
+// diagnosisSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: "treatments",
+//     select: "plan dosage mode frequency note ",
+//   });
+//   next();
+// });
 
 diagnosisSchema.pre("save", async function (next) {
   // Check if physician exists or is an actual physician
-  // Check if specialization is doctor?
   const string = this.physician.toString();
   const physician = await Physician.findOne({ user: string });
   if (!physician) {

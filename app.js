@@ -47,7 +47,7 @@ app.use("/api/v1/diagnosis", diagnosisRoutes);
 app.use("/api/v1/test", testRoutes);
 app.use("/api/v1/treatment", treatmentRoutes);
 
-// ================= All undefined routes ===================
+// ================= All undefined routes =================== //
 app.use("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });

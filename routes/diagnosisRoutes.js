@@ -8,6 +8,15 @@ const router = express.Router({ mergeParams: true });
 
 router.use("/:diagnosisId/treatment", treatmentRoutes);
 
+
+router.get("/user", diagnosisController.getUserDiagnosis);
+
+router.get(
+  "/me",
+  authController.protect,
+  diagnosisController.getLoggedInUserDiagnosis
+);
+
 router
   .route("/")
   .get(diagnosisController.getAllDiagnosis)
@@ -18,7 +27,13 @@ router
   );
 
 router
-  .route("/:id")
+  .route("/:diagnosisId")
+  .get(diagnosisController.getDiagnosis)
+  .patch(
+    authController.protect,
+    authController.restrictTo("Physician"),
+    diagnosisController.updateDiagnosis
+  )
   .delete(
     authController.protect,
     authController.restrictTo("Physician"),

@@ -6,7 +6,7 @@ const patientSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Patient must be a user"],
+      required: [true, "Patient must be an existing user"],
       unique: true,
     },
     bloodType: {

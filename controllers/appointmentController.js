@@ -17,7 +17,7 @@ exports.getAllAppointments = asyncHandler(async (req, res) => {
 exports.getUserAppointments = asyncHandler(async (req, res) => {
   // Get patientId from userId
   const appointments = await Appointment.find({
-    patient: req.params.patientId,
+    patient: req.params.patientId, // pass userId as patientId
   });
   res.status(200).json({
     status: "success",
@@ -26,8 +26,17 @@ exports.getUserAppointments = asyncHandler(async (req, res) => {
   });
 });
 
+exports.getLoggedInUserAppointments = asyncHandler(async (req, res) => {
+  const appointments = await Appointment.find({ patient: req.user._id });
+  res.status(200).json({
+    status: "success",
+    length: appointments.length,
+    data: appointments,
+  });
+});
+
 exports.getAppointment = asyncHandler(async (req, res, next) => {
-  const appointment = await Appointment.findById(req.params.id);
+  const appointment = await Appointment.findById(req.params.appointmentId);
   res.status(200).json({
     status: "success",
     data: appointment,
@@ -124,6 +133,11 @@ exports.cancelAppointment = asyncHandler(async (req, res, next) => {
 });
 
 exports.rescheduleAppointment = asyncHandler(async (req, res, next) => {
+    if (app.createdBy.toString() !== req.user.id && req.user.role !== "admin") {
+      return next(
+        new AppError("You are not allowed to cancel this appointment", 401)
+      );
+    }
   const appointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     {

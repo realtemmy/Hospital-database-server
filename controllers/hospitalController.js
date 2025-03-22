@@ -1,9 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const AppError = require("./../utils/appError");
 const Hospital = require("./../models/hospitalModel");
-const Laboratory = require("./../models/laboratoryModel");
 
-exports.getAllHospitals = asyncHandler(async (req, res, next) => {
+exports.getAllHospitals = asyncHandler(async (req, res) => {
   const hospitals = await Hospital.find();
 
   res.status(200).json({
@@ -13,7 +12,7 @@ exports.getAllHospitals = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getHospitalById = asyncHandler(async (req, res, next) => {
+exports.getHospital = asyncHandler(async (req, res, next) => {
   const hospital = await Hospital.findById(req.params.id);
 
   if (!hospital) {
@@ -72,23 +71,41 @@ exports.addRoomsToHospital = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.removeRoomFromHospital = asyncHandler(async (req, res, next) => {
+  const hospital = await Hospital.findByIdAndUpdate(
+    req.params.hospitalId,
+    {
+      $pull: {
+        rooms: {
+          roomNumber: req.body.roomNumber,
+          roomType: req.body.roomType,
+          capacity: req.body.capacity,
+        },
+      },
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!hospital) {
+    return next(new AppError("No hospital with ID found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: hospital,
+  });
+});
+
 exports.assignRoom = asyncHandler(async (req, res, next) => {
   const { roomNumber, patientId } = req.body;
   const hospital = await Hospital.findOneAndUpdate(
-    {
-      _id: req.params.id,
-      "rooms.roomNumber": roomNumber,
-      "rooms.isOccupied": false,
-    },
-    {
-      $set: {
-        "rooms.$.isOccupied": true,
-        "rooms.$.patient": patientId,
-      },
-    }
+    { _id: req.params.hospitalId, "rooms.roomNumber": roomNumber },
+    { $push: { "rooms.$.currentPatients": patientId } },
+    { new: true }
   );
+
   if (!hospital) {
-    return next(new AppError("Room is not available.", 401)); //Room is already occupied or not found
+    return next(new AppError("No room match found in hospital.", 404)); //Room is already occupied or not found
   }
   res.status(200).json({
     status: "success",
@@ -97,18 +114,17 @@ exports.assignRoom = asyncHandler(async (req, res, next) => {
 });
 
 exports.unassignRoom = asyncHandler(async (req, res, next) => {
+  const { roomNumber, patientId } = req.body;
   const hospital = await Hospital.findOneAndUpdate(
-    {
-      _id: req.params.id,
-      "rooms.patient": req.body.patientId,
-    },
-    {
-      $set: {
-        "rooms.$.isOccupied": false,
-        "rooms.$.patient": null,
-      },
-    }
+    { _id: req.params.hospitalId, "rooms.roomNumber": roomNumber },
+    { $pull: { "rooms.$.currentPatients": patientId } },
+    { new: true }
   );
+
+  if (!hospital) {
+    return next(new AppError("No room matches given info", 401)); //Room is already occupied or not found
+  }
+
   res.status(200).json({
     status: "success",
     data: hospital,

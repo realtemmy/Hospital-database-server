@@ -52,66 +52,92 @@ appointmentSchema.virtual("diagnosis", {
   ref: "Diagnosis",
   foreignField: "appointment",
   localField: "_id",
+  options: function () {
+    return {
+      match: { patient: this.patient },
+    };
+  },
 });
 appointmentSchema.virtual("tests", {
   ref: "Test",
   foreignField: "appointment",
   localField: "_id",
+  options: function () {
+    return {
+      match: { patient: this.patient },
+    };
+  },
 });
 
-appointmentSchema.pre(/^find/, function (next) {
-  this.populate({ path: "diagnosis", select: "symptoms note" }); // Automatically populate the virtual
-  next();
-});
-appointmentSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "tests",
-    select: "name category interpretation -appointment",
-  }); // Automatically populate the virtual
-  next();
-});
 
 appointmentSchema.pre("save", async function (next) {
   try {
-    // Check if physician exists
-    const objectId = this.physician;
-    const string = objectId.toString();
+    const Appointment = mongoose.models.Appointment;
 
-    const physician = await Physician.findOne({ user: string });
+    const physicianId = this.physician.toString();
+
+    // Check if the physician exists
+    const physician = await Physician.findOne({ user: physicianId });
     if (!physician) {
       return next(new AppError("User is not a physician", 401));
     }
 
-    // Check for conflicting appointments with the same physician
-    const Appointment = mongoose.models.Appointment;
+    // Define appointment duration (e.g., 30 minutes)
+    const APPOINTMENT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+    // Calculate the start and end time of the new appointment
+    const appointmentStart = this.timeSlot;
+    const appointmentEnd = new Date(
+      appointmentStart.getTime() + APPOINTMENT_DURATION
+    );
+
+    // Check for overlapping appointments for the same physician
     const isPhysicianConflict = await Appointment.exists({
       physician: this.physician,
-      timeSlot: this.timeSlot,
+      $or: [
+        { timeSlot: { $gte: appointmentStart, $lt: appointmentEnd } }, // Starts within the new appointment window
+        {
+          timeSlot: {
+            $lt: appointmentStart,
+            $gte: new Date(appointmentStart - APPOINTMENT_DURATION),
+          },
+        }, // Ends within the new appointment window
+      ],
     });
+
     if (isPhysicianConflict) {
       return next(
         new AppError(
-          `Physician is not available for the appointment at ${this.timeSlot}`,
+          `Physician is not available between ${appointmentStart.toISOString()} and ${appointmentEnd.toISOString()}`,
           400
         )
       );
     }
 
-    // Check for conflicting appointments with the same patient
+    // Check for overlapping appointments for the same patient
     const isPatientConflict = await Appointment.exists({
       patient: this.patient,
-      timeSlot: this.timeSlot,
+      $or: [
+        { timeSlot: { $gte: appointmentStart, $lt: appointmentEnd } },
+        {
+          timeSlot: {
+            $lt: appointmentStart,
+            $gte: new Date(appointmentStart - APPOINTMENT_DURATION),
+          },
+        },
+      ],
     });
+
     if (isPatientConflict) {
       return next(
         new AppError(
-          "You already have an appointment booked for this time slot.",
+          "You already have an appointment booked within this time frame.",
           400
         )
       );
     }
 
-    // Prevent appointments in the past
+    // Prevent scheduling in the past
     if (this.timeSlot <= Date.now()) {
       return next(
         new AppError("Cannot schedule appointments in the past", 400)
@@ -123,6 +149,7 @@ appointmentSchema.pre("save", async function (next) {
     next(err);
   }
 });
+
 
 // if after timeslot date is passed, appointment is no-show
 

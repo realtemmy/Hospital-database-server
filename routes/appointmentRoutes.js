@@ -18,12 +18,18 @@ router.use("/:appointmentId/diagnosis", diagnosisRoutes);
 // 5. User does not show up for the appointment
 // 6. User reschedules the appointment
 
-router.route("/:id").get(appointmentController.getAppointment);
+router.route("/:appointmentId").get(appointmentController.getAppointment)
 
 router.get(
   "/user",
   authController.protect,
   appointmentController.getUserAppointments
+);
+
+router.get(
+  "/me",
+  authController.protect,
+  appointmentController.getLoggedInUserAppointments
 );
 
 router.route("/").get(appointmentController.getAllAppointments).post(
@@ -35,7 +41,7 @@ router.route("/").get(appointmentController.getAllAppointments).post(
 router.patch(
   "/:id/confirm",
   authController.protect,
-  authController.restrictTo("admin"),
+  authController.restrictTo("Admin"),
   appointmentController.confirmAppointment
 );
 
@@ -49,7 +55,7 @@ router.patch(
 router.patch("/:id/cancel", appointmentController.cancelAppointment);
 router.patch(
   "/:id/reschedule",
-  authController.restrictTo("admin"),
+  authController.restrictTo("Admin", "Patient"),
   appointmentController.rescheduleAppointment
 );
 

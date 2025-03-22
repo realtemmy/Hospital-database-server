@@ -1,7 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Diagnosis = require("./../models/diagnosisModel");
 const MedicalHistory = require("./../models/medicalHistory");
-const Appointment = require("./../models/appointmentModel");
 const AppError = require("./../utils/appError");
 
 exports.getAllDiagnosis = asyncHandler(async (req, res) => {
@@ -30,13 +29,6 @@ exports.createDiagnosis = asyncHandler(async (req, res) => {
     diagnosis: diagnosis._id,
     status: "ongoing",
   });
-  await Appointment.findByIdAndUpdate(
-    appointmentId,
-    {
-      diagnosis: diagnosis._id,
-    },
-    { new: true, runValidators: true }
-  );
 
   res.status(201).json({
     status: "success",
@@ -44,11 +36,47 @@ exports.createDiagnosis = asyncHandler(async (req, res) => {
   });
 });
 
+exports.getDiagnosis = asyncHandler(async (req, res) => {
+  const diagnosis = await Diagnosis.findById(req.params.diagnosisId);
+  res.status(200).json({
+    status: "success",
+    data: diagnosis,
+  });
+});
 
+exports.getUserDiagnosis = asyncHandler(async (req, res) => {
+  const diagnosis = await Diagnosis.find({ patient: req.body.patientId }); //more of user's id
+  res.status(200).json({
+    status: "success",
+    length: diagnosis.length,
+    data: diagnosis,
+  });
+});
 
-exports.deleteDiagnosis = asyncHandler(async (req, res, next) => {
+exports.getLoggedInUserDiagnosis = asyncHandler(async (req, res) => {
+  const diagnosis = await Diagnosis.find({ patient: req.user.id });
+  res.status(200).json({
+    status: "success",
+    data: diagnosis,
+  });
+});
+
+exports.updateDiagnosis = asyncHandler(async (req, res) => {
+  const diagnosis = await Diagnosis.findByIdAndUpdate(
+    req.params.diagnosisId,
+    req.body,
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    status: "success",
+    data: diagnosis,
+  });
+});
+
+exports.deleteDiagnosis = asyncHandler(async (req, res) => {
   // Only the doctor that created can delete
-  await Diagnosis.findByIdAndDelete(req.params.id);
+  await Diagnosis.findByIdAndDelete(req.params.diagnosisId);
   res.status(204).json({
     status: "success",
     data: null,
