@@ -119,6 +119,12 @@ userSchema.methods.comparePasswords = async function (
   return await bcrypt.compare(userPassword, JWTEncodedPassword);
 };
 
+userSchema.pre("save", function(next) {
+  if(this.role === "Admin"){
+    
+  }
+});
+
 userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
   if (this.passwordChangedAt) {
     const changedTimeStamp = parseInt(

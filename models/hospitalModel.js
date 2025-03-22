@@ -32,6 +32,10 @@ const hospitalSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     // Array of laboratories associated with the hospital
     // laboratories: [
     //   {

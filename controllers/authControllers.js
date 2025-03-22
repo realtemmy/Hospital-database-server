@@ -1,10 +1,12 @@
 const crypto = require("crypto");
+const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+
 const User = require("./../models/userModel");
 const Patient = require("./../models/patientModel");
-const asyncHandler = require("express-async-handler");
 const Physician = require("../models/physicianModel");
+const Hospital = require("./../models/hospitalModel");
 const AppError = require("./../utils/appError");
-const jwt = require("jsonwebtoken");
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -38,24 +40,36 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signUp = asyncHandler(async (req, res, next) => {
   // Create user and then create patient
+  // If role is admin
+
   const newUser = await User.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    role: req.body.role,
+    role: req.body.role, // patient or physician
     gender: req.body.gender,
   });
 
-  if(req.body.role === "Physician") {
+  if (req.body.role === "Physician") {
     await Physician.create({
       user: newUser._id,
     });
-  }else{
+  } else if (req.body.role === "Patient") {
     await Patient.create({
       user: newUser._id,
     });
+  } else {
+    // User is an admin
+    const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
+      admin: newUser._id,
+    });
+
+    if (!hospital) {
+      return next(new AppError("No hospital with ID found", 404));
+    }
+    hospital;
   }
 
   createSendToken(newUser, 201, res);
