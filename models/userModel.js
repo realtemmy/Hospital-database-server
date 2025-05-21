@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const AppError = require("../utils/appError");
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,6 +12,10 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
       required: [true, "Patient must have a last name"],
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
     email: {
       type: String,
@@ -55,7 +60,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: ["male", "female"],
-        message: "{value} for gender is not supported",
+        message:
+          "{value} for gender is not supported. Only male and female are supported values for Gender",
       },
       required: [true, "User must provide gender"],
     },
@@ -64,24 +70,27 @@ const userSchema = new mongoose.Schema(
     },
     socials: [
       {
-        type: String,
+        title: String,
+        value: String,
       },
     ],
     //   Maybe add up to 2 or 3 emergency contacts
-    emergencyContact: {
-      name: {
-        type: String,
+    emergencyContact: [
+      {
+        name: {
+          type: String,
+        },
+        relationship: {
+          type: String,
+        },
+        phone: {
+          type: String,
+        },
+        email: {
+          type: String,
+        },
       },
-      relationship: {
-        type: String,
-      },
-      phone: {
-        type: String,
-      },
-      email: {
-        type: String,
-      },
-    },
+    ],
     expire: {
       type: Boolean,
       default: false,
@@ -112,6 +121,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("save", function (next) {
+  if (this.dateOfBirth > Date.now()) {
+    return next(new AppError("Date of birth cannot be in the future", 401));
+  }
+  next();
+});
+
 userSchema.methods.comparePasswords = async function (
   userPassword,
   JWTEncodedPassword
@@ -119,9 +135,8 @@ userSchema.methods.comparePasswords = async function (
   return await bcrypt.compare(userPassword, JWTEncodedPassword);
 };
 
-userSchema.pre("save", function(next) {
-  if(this.role === "Admin"){
-    
+userSchema.pre("save", function (next) {
+  if (this.role === "Admin") {
   }
 });
 

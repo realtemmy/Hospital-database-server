@@ -23,15 +23,13 @@ const app = express();
 //  ============= Hospital ================ //
 // In and out patients, hospital receptionists/admin
 
-
 // ========= Files and storage ================ //
-// File formats: 
+// File formats:
 // - Text/document files eg CSV, PDF, DOCS - Google cloud storage or Firebase or AWS
 // - Images and videos - Cloudinary
 
-
 app.use(cors({ origin: "*" }));
-app.use(express.json());   
+app.use(express.json());
 app.use(compression());
 
 // ================ Routes Middlewares ======================
@@ -40,12 +38,14 @@ const appointmentRoutes = require("./routes/appointmentRoutes");
 const diagnosisRoutes = require("./routes/diagnosisRoutes");
 const testRoutes = require("./routes/testRoutes");
 const treatmentRoutes = require("./routes/treatmentRoutes");
+const hospitalRoutes = require("./routes/hospitalRoutes");
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/appointment", appointmentRoutes);
 app.use("/api/v1/diagnosis", diagnosisRoutes);
 app.use("/api/v1/test", testRoutes);
 app.use("/api/v1/treatment", treatmentRoutes);
+app.use("/api/v1/hospital", hospitalRoutes);
 
 // ================= All undefined routes =================== //
 app.use("*", (req, res, next) => {

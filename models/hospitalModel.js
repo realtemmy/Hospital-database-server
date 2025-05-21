@@ -7,15 +7,33 @@ const hospitalSchema = new mongoose.Schema(
       required: [true, "Hospital name is required"],
       trim: true,
     },
-    address: {
+    type: {
       type: String,
-      required: [true, "Hospital address is required"],
-      trim: true,
+      requird: [true, "Hospital type is required"],
+      enum: [
+        "General Hospital",
+        "Specialized Hospital",
+        "Teaching Hospital",
+        "Research Hospital",
+        "Community Hospital",
+        "Private Hospital",
+        "Public Hospital",
+      ],
     },
+    specializations: [
+      {
+        type: String,
+      },
+    ],
     phone: {
       type: String,
+      validate: {
+        validator: function (value) {
+          return /^\d{10}$/.test(value); // Example: Validate a 10-digit phone number
+        },
+        message: `{VALUE} is not a valid phone number. It should be 10 digits long.`,
+      },
       required: [true, "Hospital phone number is required"],
-      trim: true,
     },
     email: {
       type: String,
@@ -26,6 +44,71 @@ const hospitalSchema = new mongoose.Schema(
     website: {
       type: String,
       trim: true,
+    },
+    address: {
+      street: {
+        type: String,
+        required: [true, "Street address is required"],
+        trim: true,
+        minLength: 5,
+      },
+      state: {
+        type: String,
+        required: [true, "State is required"],
+        trim: true,
+        minLength: 2,
+      },
+      city: {
+        type: String,
+        required: [true, "City is required"],
+        trim: true,
+        minLength: 2,
+      },
+      zip: {
+        type: String,
+        required: [true, "Zip code is required"],
+        trim: true,
+        minLength: 6,
+      },
+      country: {
+        type: String,
+        required: [true, "Country is required"],
+        trim: true,
+        minLength: 2,
+      },
+    },
+    bedCount: {
+      type: Number,
+      min: [0, "Bed count cannot be a negative value"],
+      default: 0,
+    },
+    emergencyServices: {
+      type: Boolean,
+      default: false,
+    },
+    operatingRoomsCount: {
+      type: Number,
+      default: 0,
+      min: [
+        0,
+        "Number of operating rooms in a hospital cannot be less than zero",
+      ],
+    },
+    licenseNumber: {
+      type: String,
+      required: [true, "Hospital license number is required"],
+      minLength: 5,
+    },
+    taxId: {
+      type: String,
+      minLength: 2,
+      required: [true, "Hospital taxId is required"],
+    },
+    accreditations: [{ type: String }],
+    description: {type: String},
+    yearEstablished: {
+      type: Date,
+      required: [true, "Hospital creation date is required"]
     },
     departments: [
       {
@@ -70,7 +153,7 @@ const hospitalSchema = new mongoose.Schema(
         capacity: {
           type: Number,
           default: 1,
-          min: 1,
+          min: [1, "Room cannot occupy less than one person"],
         },
         isOccupied: {
           type: Boolean,
@@ -155,7 +238,6 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
 
   next();
 });
-
 
 const Hospital = mongoose.model("Hospital", hospitalSchema);
 

@@ -65,7 +65,6 @@ const treatmentSchema = new mongoose.Schema(
         endDate: Date,
       },
     ],
-
     note: {
       type: String,
       trim: true,
@@ -76,20 +75,13 @@ const treatmentSchema = new mongoose.Schema(
   }
 );
 
-// check if user is a verified surgeon or doctor
-
-// treatmentSchema.pre(/^find/, function (next) {
-//   this.populate({
-//     path: ""
-//   });
-// });
-// treatmentSchema.pre("save", function (next) {
-//   // if mode is surgery, then surgery details must be provided
-//   if (this.mode === "surgery" && this.surgery.length === 0) {
-//     return next(new AppError("Surgery details must be provided", 400));
-//   }
-//   next();
-// });
+treatmentSchema.pre("save", function (next) {
+  // if mode is surgery, then surgery details must be provided
+  if (this.mode === "surgery" && this.surgery.length === 0) {
+    return next(new AppError("Surgery details must be provided", 400));
+  }
+  next();
+});
 
 const Treatment = mongoose.model("Treatment", treatmentSchema);
 
