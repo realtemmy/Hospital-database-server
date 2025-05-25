@@ -39,15 +39,19 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signUp = asyncHandler(async (req, res, next) => {
-
   const newUser = await User.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
+    phone: req.body.phoneNumber,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    role: req.body.role, // patient or physician
+    role: req.body.role, // patient, physician or admin
     gender: req.body.gender,
+    dateOfBirth: req.body.dateOfBirth,
+    address: req.body.address,
+    socials: req.body.socials,
+    emergencyContacts: req.body.emergencyContacts,
   });
 
   if (req.body.role === "Physician") {
@@ -58,22 +62,25 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     await Patient.create({
       user: newUser._id,
     });
-  } else {
-    // User is an admin
-    const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
-      admin: newUser._id,
-    });
+  } 
+  // else {
+  //   // User is an admin
+  //   const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
+  //     admin: newUser._id,
+  //   });
 
-    if (!hospital) {
-      return next(new AppError("No hospital with ID found", 404));
-    }
-  }
+  //   if (!hospital) {
+  //     return next(new AppError("No hospital with ID found", 404));
+  //   }
+  // }
 
   createSendToken(newUser, 201, res);
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
+
+  console.log(email,password)
 
   if (!email || !password) {
     return next(new AppError("Please provide email and password", 400));

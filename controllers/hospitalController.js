@@ -25,7 +25,8 @@ exports.getHospital = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.createHospital = asyncHandler(async (req, res, next) => {
+exports.createHospital = asyncHandler(async (req, res) => {
+  console.log(req.body.address)
   const hospital = await Hospital.create({
     name: req.body.name,
     address: req.body.address,
@@ -33,6 +34,13 @@ exports.createHospital = asyncHandler(async (req, res, next) => {
     phone: req.body.phone,
     email: req.body.email,
     website: req.body.website,
+    taxId: req.body.taxId,
+    licenseNumber: req.body.licenseNumber,
+    emergencyServices: req.body.emergencyServices,
+    accreditations: req.body.accreditations,
+    description: req.body.description,
+    yearEstablished: req.body.yearEstablished,
+    specializations: req.body.specializations,
     // Array of laboratories associated with the hospital
   });
 

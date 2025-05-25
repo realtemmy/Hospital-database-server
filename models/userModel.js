@@ -26,14 +26,12 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "A user must have a password."],
-      minlength: 8,
+      minlength: 4,
       select: false,
     },
     confirmPassword: {
       // Remember to validate
       type: String,
-      required: [true, "please input confirm password"],
       validate: {
         validator: function (el) {
           return el === this.password;
@@ -55,6 +53,7 @@ const userSchema = new mongoose.Schema(
     },
     address: {
       type: String,
+      // required: [true, "User address is required"],
     },
     gender: {
       type: String,
@@ -75,7 +74,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     //   Maybe add up to 2 or 3 emergency contacts
-    emergencyContact: [
+    emergencyContacts: [
       {
         name: {
           type: String,
@@ -112,6 +111,14 @@ userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
+userSchema.pre("save", function (next) {
+  if(!this.password && this.firstName && this.lastName) {
+    this.password = this.firstName[0] + this.lastName[0] + "1234";
+    this.confirmPassword = this.password;
+  }
+  next();
+});
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -134,11 +141,6 @@ userSchema.methods.comparePasswords = async function (
 ) {
   return await bcrypt.compare(userPassword, JWTEncodedPassword);
 };
-
-userSchema.pre("save", function (next) {
-  if (this.role === "Admin") {
-  }
-});
 
 userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
   if (this.passwordChangedAt) {

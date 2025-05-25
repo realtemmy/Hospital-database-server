@@ -28,7 +28,15 @@ const app = express();
 // - Text/document files eg CSV, PDF, DOCS - Google cloud storage or Firebase or AWS
 // - Images and videos - Cloudinary
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // Only if using cookies or auth headers
+  })
+);
+
 app.use(express.json());
 app.use(compression());
 

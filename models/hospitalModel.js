@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const hospitalSchema = new mongoose.Schema(
   {
@@ -11,13 +12,14 @@ const hospitalSchema = new mongoose.Schema(
       type: String,
       requird: [true, "Hospital type is required"],
       enum: [
-        "General Hospital",
-        "Specialized Hospital",
-        "Teaching Hospital",
-        "Research Hospital",
-        "Community Hospital",
-        "Private Hospital",
-        "Public Hospital",
+        "general",
+        "specialized",
+        "teaching",
+        "research",
+        "community",
+        "private",
+        "public",
+        "other",
       ],
     },
     specializations: [
@@ -29,9 +31,9 @@ const hospitalSchema = new mongoose.Schema(
       type: String,
       validate: {
         validator: function (value) {
-          return /^\d{10}$/.test(value); // Example: Validate a 10-digit phone number
+          return /^\d{11}$/.test(value); // Example: Validate a 10-digit phone number
         },
-        message: `{VALUE} is not a valid phone number. It should be 10 digits long.`,
+        message: `{VALUE} is not a valid phone number. It should be 11 digits long.`,
       },
       required: [true, "Hospital phone number is required"],
     },
@@ -40,10 +42,12 @@ const hospitalSchema = new mongoose.Schema(
       required: [true, "Hospital email is required"],
       trim: true,
       lowercase: true,
+      validate: [validator.isEmail, "Please enter a valid email address"],
     },
     website: {
       type: String,
       trim: true,
+      validate: [validator.isURL, "Please enter a valid URL"],
     },
     address: {
       street: {
@@ -69,6 +73,12 @@ const hospitalSchema = new mongoose.Schema(
         required: [true, "Zip code is required"],
         trim: true,
         minLength: 6,
+        validate: {
+          validator: function (value) {
+            return /^\d{6}$/.test(value);
+          },
+          message: "Invalid Postal code. Must be at least 6 digits",
+        },
       },
       country: {
         type: String,
@@ -77,22 +87,9 @@ const hospitalSchema = new mongoose.Schema(
         minLength: 2,
       },
     },
-    bedCount: {
-      type: Number,
-      min: [0, "Bed count cannot be a negative value"],
-      default: 0,
-    },
     emergencyServices: {
       type: Boolean,
       default: false,
-    },
-    operatingRoomsCount: {
-      type: Number,
-      default: 0,
-      min: [
-        0,
-        "Number of operating rooms in a hospital cannot be less than zero",
-      ],
     },
     licenseNumber: {
       type: String,
@@ -102,13 +99,18 @@ const hospitalSchema = new mongoose.Schema(
     taxId: {
       type: String,
       minLength: 2,
-      required: [true, "Hospital taxId is required"],
+      required: [true, "Hospital taxId is required."],
     },
     accreditations: [{ type: String }],
-    description: {type: String},
+    description: { type: String },
     yearEstablished: {
-      type: Date,
-      required: [true, "Hospital creation date is required"]
+      type: Number,
+      required: [true, "Hospital creation date is required."],
+      min: [1800, "Creation date should not be less than 1800."],
+      max: [
+        new Date().getFullYear(),
+        "Hospital cannot be created in the future.",
+      ],
     },
     departments: [
       {
