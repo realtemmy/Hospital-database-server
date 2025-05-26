@@ -62,25 +62,22 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     await Patient.create({
       user: newUser._id,
     });
-  } 
-  // else {
-  //   // User is an admin
-  //   const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
-  //     admin: newUser._id,
-  //   });
+  } else {
+    // User is an admin
+    const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
+      admin: newUser._id,
+    });
 
-  //   if (!hospital) {
-  //     return next(new AppError("No hospital with ID found", 404));
-  //   }
-  // }
+    if (!hospital) {
+      return next(new AppError("No hospital with ID found", 404));
+    }
+  }
 
   createSendToken(newUser, 201, res);
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-
-  console.log(email,password)
 
   if (!email || !password) {
     return next(new AppError("Please provide email and password", 400));

@@ -9,7 +9,16 @@ router
   .get(hospitalController.getAllHospitals)
   .post(hospitalController.createHospital);
 
-router.route("/:id").get(hospitalController.getHospital)
+
+// Check if it's the hospital admin gan gan before allowing to update details
+router
+  .route("/:hospitalId")
+  .get(hospitalController.getHospital)
+  .patch(
+    authController.protect,
+    authController.restrictTo("Admin"),
+    hospitalController.updateHospitalDetails
+  );
 
 //   Must be an admin associated with the hospital
 router.patch(

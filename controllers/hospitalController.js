@@ -13,7 +13,7 @@ exports.getAllHospitals = asyncHandler(async (req, res) => {
 });
 
 exports.getHospital = asyncHandler(async (req, res, next) => {
-  const hospital = await Hospital.findById(req.params.id);
+  const hospital = await Hospital.findById(req.params.hospitalId);
 
   if (!hospital) {
     return next(new Error("No hospital with ID found"));
@@ -26,7 +26,6 @@ exports.getHospital = asyncHandler(async (req, res, next) => {
 });
 
 exports.createHospital = asyncHandler(async (req, res) => {
-  console.log(req.body.address)
   const hospital = await Hospital.create({
     name: req.body.name,
     address: req.body.address,
@@ -67,6 +66,37 @@ exports.addRoomsToHospital = asyncHandler(async (req, res, next) => {
       },
     },
     { new: true, runValidators: true }
+  );
+
+  if (!hospital) {
+    return next(new AppError("No hospital with ID found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: hospital,
+  });
+});
+
+exports.updateHospitalDetails = asyncHandler(async (req, res, next) => {
+  const obj = req.body;
+  // allow editing stuff like name, email, spacializations, phone, website, accreditations, description
+  // Or more of don't allow rooms, and maybe department
+  const newObj = {};
+  for (const key in obj) {
+    const exclude = ["rooms"];
+    if (!exclude.includes(key)) {
+      newObj[key] = obj[key];
+    }
+  }
+
+  const hospital = await Hospital.findByIdAndUpdate(
+    req.params.hospitalId,
+    newObj,
+    {
+      new: true,
+      runValidators: true,
+    }
   );
 
   if (!hospital) {

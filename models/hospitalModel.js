@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const User = require("./userModel");
 
 const hospitalSchema = new mongoose.Schema(
   {
@@ -188,6 +189,15 @@ hospitalSchema.virtual("occupiedRooms").get(function () {
 // Virtual to get the number of available rooms
 hospitalSchema.virtual("availableRooms").get(function () {
   return this.rooms.filter((room) => !room.isOccupied).length;
+});
+
+hospitalSchema.pre("save", async function (next) {
+  // Check if the admin is an actual admin
+  const userAdmin = await User.findById(this.admin);
+  if (userAdmin.role !== "Admin" && this.admin !== userAdmin.id) {//not working completely
+    return next("Unauthorized!. You're not an admin", 401);
+  }
+  next();
 });
 
 hospitalSchema.pre("save", function (next) {
