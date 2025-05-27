@@ -1,4 +1,4 @@
-const express = require("express-async-handler");
+const express = require("express");
 const authController = require("./../controllers/authControllers");
 const patientController = require("./../controllers/patientController");
 
@@ -13,7 +13,7 @@ router.get(
 router.route("/").get(patientController.getAllPatients);
 
 router
-  .route("/:id")
+  .route("/:patientId")
   .get(authController.protect, patientController.getPatientById)
   .patch(
     authController.protect,

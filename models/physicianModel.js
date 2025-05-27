@@ -27,6 +27,14 @@ const physicianSchema = new mongoose.Schema({
   },
 });
 
+physicianSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: "user",
+    select: "email photo firstName lastName",
+  })
+  next()
+})
+
 const Physician = mongoose.model("Physician", physicianSchema);
 
 module.exports = Physician;

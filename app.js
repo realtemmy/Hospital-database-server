@@ -47,6 +47,8 @@ const diagnosisRoutes = require("./routes/diagnosisRoutes");
 const testRoutes = require("./routes/testRoutes");
 const treatmentRoutes = require("./routes/treatmentRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
+const patientRoutes = require("./routes/patientsRoutes");
+const physicianRoutes = require("./routes/physicianRoutes")
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/appointment", appointmentRoutes);
@@ -54,6 +56,8 @@ app.use("/api/v1/diagnosis", diagnosisRoutes);
 app.use("/api/v1/test", testRoutes);
 app.use("/api/v1/treatment", treatmentRoutes);
 app.use("/api/v1/hospital", hospitalRoutes);
+app.use("/api/v1/patient", patientRoutes);
+app.use("/api/v1/physician", physicianRoutes)
 
 // ================= All undefined routes =================== //
 app.use("*", (req, res, next) => {

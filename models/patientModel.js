@@ -44,6 +44,14 @@ patientSchema.virtual("medicalHistory", {
   localField: "_id",
 });
 
+patientSchema.pre(/^find/, function(next) {
+  this.populate({
+    path:"user",
+    select: "email photo firstName lastName"
+  })
+  next()
+})
+
 const Patient = mongoose.model("Patient", patientSchema);
 
 module.exports = Patient;
