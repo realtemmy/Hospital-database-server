@@ -5,6 +5,7 @@ const userController = require("./../controllers/userController");
 const router = express.Router({ mergeParams: true });
 
 router.get("/patients", userController.getUserPatients)
+router.get("/physicians", userController.getUserPhysicians);
 
 router.post("/auth/signup", authController.signUp);
 router.post("/auth/login", authController.login);

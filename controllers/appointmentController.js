@@ -3,8 +3,6 @@ const Appointment = require("../models/appointmentModel");
 const MedicalHistory = require("./../models/medicalHistory");
 const AppError = require("./../utils/appError");
 
-const { parse } = require("date-fns");
-
 exports.getAllAppointments = asyncHandler(async (req, res) => {
   const appointments = await Appointment.find();
   res.status(200).json({
@@ -44,17 +42,14 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
 });
 
 exports.createAppointment = asyncHandler(async (req, res) => {
-  //admin
-  const parsedDate = parse(req.body.timeSlot, "hha, MMM do, yyyy", new Date());
-
-  if (isNaN(parsedDate)) {
-    throw new AppError("Invalid date format. Use '3am, May 26th, 2025", 400);
-  }
   const appointment = await Appointment.create({
-    physician: req.body.physician,
-    patient: req.body.patient,
-    timeSlot: parsedDate,
+    physician: req.body.physicianId,
+    patient: req.body.patientId,
+    timeSlot: req.body.time,
+    date: req.body.date,
+    type: req.body.appointmentType,
     createdBy: req.user.id,
+    notes: req.body.notes,
   });
 
   res.status(201).json({
@@ -133,11 +128,11 @@ exports.cancelAppointment = asyncHandler(async (req, res, next) => {
 });
 
 exports.rescheduleAppointment = asyncHandler(async (req, res, next) => {
-    if (app.createdBy.toString() !== req.user.id && req.user.role !== "admin") {
-      return next(
-        new AppError("You are not allowed to cancel this appointment", 401)
-      );
-    }
+  if (app.createdBy.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new AppError("You are not allowed to cancel this appointment", 401)
+    );
+  }
   const appointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     {

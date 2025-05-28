@@ -4,6 +4,8 @@ const physicianController = require("./../controllers/physicianController");
 
 const router = express.Router();
 
+
+
 router
   .route("/")
   .get(physicianController.getAllPhysicians)

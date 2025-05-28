@@ -43,6 +43,16 @@ exports.getUserPatients = asyncHandler(async (req, res) => {
   });
 });
 
+exports.getUserPhysicians = asyncHandler( async (req,res) => {
+  const users = await User.find({ role: "Physician" }).select("firstName lastName photo email");
+
+  res.status(200).json({
+    status: "success",
+    length: users.length,
+    data: users,
+  });
+})
+
 exports.deleteUser = asyncHandler(async (req, res, next) => {
   // Update when someone dies
   const user = await User.findByIdAndUpdate(

@@ -25,18 +25,12 @@ const appointmentSchema = new mongoose.Schema(
           "consultation",
           "surgery",
         ],
-        message: "{VALUE} is not a valid appoin tment type",
+        message: "{VALUE} is not a valid appointment type",
       },
     },
     timeSlot: {
-      type: Date,
+      type: String,
       // required: [true, "Time slot for appointment is required."],
-      validate: {
-        validator: function (value) {
-          return value > Date.now();
-        },
-        message: "Appointment time slot must be in the future.",
-      },
     },
     date: {
       type: Date,
@@ -60,6 +54,9 @@ const appointmentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Creator of the appointment must be specified"],
+    },
+    time: {
+      type: Date,
     },
     notes: {
       type: String,
@@ -93,75 +90,99 @@ appointmentSchema.virtual("tests", {
   },
 });
 
+
+// ================ Deepseek rewrote the logic and it's working, don't touch =================== //
+// Logic is to prevent appointment conflicts
 appointmentSchema.pre("save", async function (next) {
+  const APPOINTMENT_DURATION = 30 * 60 * 1000; 
   try {
     const Appointment = mongoose.models.Appointment;
-
     const physicianId = this.physician.toString();
 
-    // Check if the physician exists
+    // Check physician exists
     const physician = await Physician.findOne({ user: physicianId });
     if (!physician) {
-      return next(new AppError("User is not a physician", 401));
+      return next(
+        new AppError("The selected healthcare provider is not available", 401)
+      );
     }
 
-    // Define appointment duration (e.g., 30 minutes)
-    const APPOINTMENT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+    // Parse time slot if provided as string
+    if (this.timeSlot && typeof this.timeSlot === "string") {
+      const timeRegex = /^(\d{1,2}):(\d{2})\s(AM|PM)$/i;
+      if (!timeRegex.test(this.timeSlot)) {
+        return next(
+          new AppError(
+            "Invalid time slot format. Please use format like '9:30 AM'",
+            400
+          )
+        );
+      }
 
-    // Calculate the start and end time of the new appointment
-    const appointmentStart = this.timeSlot;
+      const [time, period] = this.timeSlot.split(" ");
+      const [hours, minutes] = time.split(":").map(Number);
+
+      const date = new Date(this.date);
+      let adjustedHours = hours;
+
+      if (period.toUpperCase() === "PM" && hours < 12) {
+        adjustedHours += 12;
+      } else if (period.toUpperCase() === "AM" && hours === 12) {
+        adjustedHours = 0;
+      }
+
+      date.setHours(adjustedHours, minutes, 0, 0);
+      this.time = date;
+    }
+
+    // Validate we have a valid time
+    if (!(this.time instanceof Date) || isNaN(this.time.getTime())) {
+      return next(new AppError("Invalid appointment time", 400));
+    }
+
+    const appointmentStart = this.time;
     const appointmentEnd = new Date(
       appointmentStart.getTime() + APPOINTMENT_DURATION
     );
 
-    // Check for overlapping appointments for the same physician
+    // Check for physician availability
     const isPhysicianConflict = await Appointment.exists({
       physician: this.physician,
-      $or: [
-        { timeSlot: { $gte: appointmentStart, $lt: appointmentEnd } }, // Starts within the new appointment window
-        {
-          timeSlot: {
-            $lt: appointmentStart,
-            $gte: new Date(appointmentStart - APPOINTMENT_DURATION),
-          },
-        }, // Ends within the new appointment window
+      $and: [
+        { time: { $lt: appointmentEnd } },
+        { time: { $gte: appointmentStart } },
       ],
     });
 
     if (isPhysicianConflict) {
       return next(
         new AppError(
-          `Physician is not available between ${appointmentStart.toISOString()} and ${appointmentEnd.toISOString()}`,
+          "The healthcare provider is not available at this time",
           400
         )
       );
     }
 
-    // Check for overlapping appointments for the same patient
+    // Check for patient conflicts
     const isPatientConflict = await Appointment.exists({
       patient: this.patient,
-      $or: [
-        { timeSlot: { $gte: appointmentStart, $lt: appointmentEnd } },
-        {
-          timeSlot: {
-            $lt: appointmentStart,
-            $gte: new Date(appointmentStart - APPOINTMENT_DURATION),
-          },
-        },
+      $and: [
+        { time: { $lt: appointmentEnd } },
+        { time: { $gte: appointmentStart } },
       ],
     });
 
     if (isPatientConflict) {
       return next(
         new AppError(
-          "You already have an appointment booked within this time frame.",
+          "You already have an appointment scheduled during this time",
           400
         )
       );
     }
 
-    // Prevent scheduling in the past
-    if (this.timeSlot <= Date.now()) {
+    // Prevent past scheduling
+    if (this.time <= new Date()) {
       return next(
         new AppError("Cannot schedule appointments in the past", 400)
       );
