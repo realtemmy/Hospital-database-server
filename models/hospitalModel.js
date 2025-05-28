@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const User = require("./userModel");
 
+// Laboratories, staff, doctors, appointments, sureries, tests, etc
 const hospitalSchema = new mongoose.Schema(
   {
     name: {
@@ -118,17 +119,17 @@ const hospitalSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    // Array of laboratories associated with the hospital
-    // laboratories: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Laboratory",
-    //   },
-    // ],
+    admin: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        validate: {
+          validator: function (value) {
+            return value.length <= 2; // A hospital should not have more than 2 admins
+          },
+        },
+      },
+    ],
     rooms: [
       {
         roomNumber: {
@@ -194,7 +195,8 @@ hospitalSchema.virtual("availableRooms").get(function () {
 hospitalSchema.pre("save", async function (next) {
   // Check if the admin is an actual admin
   const userAdmin = await User.findById(this.admin);
-  if (userAdmin.role !== "Admin" && this.admin !== userAdmin.id) {//not working completely
+  if (userAdmin.role !== "Admin" && this.admin !== userAdmin.id) {
+    //not working completely
     return next("Unauthorized!. You're not an admin", 401);
   }
   next();

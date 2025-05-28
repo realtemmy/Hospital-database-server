@@ -12,15 +12,15 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUser = asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
-    if(!user){
-        return next(new AppError('No document with ID found', 404));
-    }
-    res.status(200).json({
-      status: "success",
-      data: user,
-    });
-})
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError("No document with ID found", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
+});
 
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
@@ -30,6 +30,16 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: user,
+  });
+});
+
+exports.getUserPatients = asyncHandler(async (req, res) => {
+  const users = await User.find({ role: "Patient" }).select("firstName lastName photo email");
+
+  res.status(200).json({
+    status: "success",
+    length: users.length,
+    data: users,
   });
 });
 

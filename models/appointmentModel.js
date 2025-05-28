@@ -14,6 +14,20 @@ const appointmentSchema = new mongoose.Schema(
       ref: "User",
       // required: [true, "Physician must be specified for the appointment"],
     },
+    type: {
+      type: String,
+      required: [true, "Type of appointment is required."],
+      enum: {
+        values: [
+          "general",
+          "follow-up",
+          "emergency",
+          "consultation",
+          "surgery",
+        ],
+        message: "{VALUE} is not a valid appoin tment type",
+      },
+    },
     timeSlot: {
       type: Date,
       // required: [true, "Time slot for appointment is required."],
@@ -22,6 +36,16 @@ const appointmentSchema = new mongoose.Schema(
           return value > Date.now();
         },
         message: "Appointment time slot must be in the future.",
+      },
+    },
+    date: {
+      type: Date,
+      required: [true, "Date of the appointment is required."],
+      validate: {
+        validator: function (value) {
+          return value >= new Date();
+        },
+        message: "Appointment date must be today or in the future.",
       },
     },
     status: {
@@ -68,7 +92,6 @@ appointmentSchema.virtual("tests", {
     };
   },
 });
-
 
 appointmentSchema.pre("save", async function (next) {
   try {
@@ -149,7 +172,6 @@ appointmentSchema.pre("save", async function (next) {
     next(err);
   }
 });
-
 
 // if after timeslot date is passed, appointment is no-show
 

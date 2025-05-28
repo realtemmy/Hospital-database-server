@@ -39,7 +39,7 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signUp = asyncHandler(async (req, res, next) => {
-  const newUser = await User.create({
+  const newUser = new User({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
@@ -54,23 +54,28 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     emergencyContacts: req.body.emergencyContacts,
   });
 
+
   if (req.body.role === "Physician") {
-    await Physician.create({
+    const physician = new Physician({
       user: newUser._id,
+      licenseNumber: req.body.licenseNumber,
     });
+    await Promise.all([newUser.save(), physician.save()])
   } else if (req.body.role === "Patient") {
-    await Patient.create({
+    const patient = new Patient({
       user: newUser._id,
     });
+    await Promise.all([newUser.save(), patient.save()]);
   } else {
     // User is an admin
-    const hospital = await Hospital.findByIdAndUpdate(req.body.hospitalId, {
+    const hospital = Hospital.findByIdAndUpdate(req.body.hospitalId, {
       admin: newUser._id,
     });
-
     if (!hospital) {
       return next(new AppError("No hospital with ID found", 404));
     }
+    hospital.admin = newUser._id;
+    await Promise.all([newUser.save(), hospital.save()]);
   }
 
   createSendToken(newUser, 201, res);

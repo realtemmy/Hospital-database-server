@@ -51,7 +51,7 @@ exports.createAppointment = asyncHandler(async (req, res) => {
     throw new AppError("Invalid date format. Use '3am, May 26th, 2025", 400);
   }
   const appointment = await Appointment.create({
-    // physician: req.body.physician,
+    physician: req.body.physician,
     patient: req.body.patient,
     timeSlot: parsedDate,
     createdBy: req.user.id,

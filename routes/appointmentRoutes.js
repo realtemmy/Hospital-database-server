@@ -34,7 +34,6 @@ router.get(
 
 router.route("/").get(appointmentController.getAllAppointments).post(
   authController.protect,
-  // authController.restrictTo("Admin", "Patient"),
   appointmentController.createAppointment
 );
 

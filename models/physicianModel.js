@@ -5,6 +5,7 @@ const physicianSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: [true, "Physician must be a user"],
+    unique: true,
   },
   specialization: {
     type: String,
@@ -12,6 +13,7 @@ const physicianSchema = new mongoose.Schema({
       values: ["Doctor", "Pharmacist", "Radiologist", "Nurse"],
       message: "{VALUE} is not supported as a specialization",
     },
+    default: "Doctor",
   },
   qualifications: [String], // eg MBBS, MD, PhD
   department: {
@@ -19,7 +21,9 @@ const physicianSchema = new mongoose.Schema({
   },
   licenseNumber: {
     type: Number,
-    // required: [true, "License number is required."],
+    required: [true, "License number is required."],
+    unique: true,
+    minLength: [5, "License number must be at least 5 characters long."],
   },
   yearsOfExperience: {
     type: Number,
@@ -27,12 +31,20 @@ const physicianSchema = new mongoose.Schema({
   },
 });
 
-physicianSchema.pre(/^find/, function(next) {
+physicianSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "user",
+    select: "email photo firstName lastName",
+  });
+  next();
+});
+
+physicianSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "email photo firstName lastName",
   })
-  next()
+  next();
 })
 
 const Physician = mongoose.model("Physician", physicianSchema);

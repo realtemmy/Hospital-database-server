@@ -10,6 +10,22 @@ exports.getAllPhysicians = asyncHandler(async (req, res) => {
   });
 });
 
+exports.createPhysician = asyncHandler(async (req, res, next) => {
+  const physician = await Physician.create({
+    user: req.user.id, // Assuming user is authenticated and user ID is available in req.user
+    department: req.body.department,
+    licenseNumber: req.body.licenseNumber,
+    specialization: req.body.specialization,
+    qualifications: req.body.qualifications,
+    yearsOfExperience: req.body.yearsOfExperience,
+  });
+
+  res.status(201).json({
+    status: "success",
+    data: physician,
+  });
+});
+
 exports.getPhysician = asyncHandler(async (req, res, next) => {
   const physician = await Physician.findById(req.params.physicianId);
   if (!physician) {
@@ -42,7 +58,7 @@ exports.updatePhysician = asyncHandler(async (req, res, next) => {
 exports.deletePhysician = asyncHandler(async (req, res) => {
   await Physician.findByIdAndDelete(req.params.physicianId);
   res.status(204).json({
-    status: success,
+    status: "success",
     data: null,
   });
 });
