@@ -33,13 +33,22 @@ exports.getLoggedInUserAppointments = asyncHandler(async (req, res) => {
   });
 });
 
-exports.getAppointment = asyncHandler(async (req, res, next) => {
+exports.getAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.findById(req.params.appointmentId);
   res.status(200).json({
     status: "success",
     data: appointment,
   });
 });
+
+// exports.getTodaysAppointment = asyncHandler(async (res, res) => {
+//   // Filter where date is greater than yesterday and less than tomorrow? or just matches today since it's date
+//   const apps = await Appointment.find({ });
+//   res.status(200).json({
+//     status: "success",
+//     data: apps,
+//   });
+// });
 
 exports.createAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.create({

@@ -90,11 +90,18 @@ appointmentSchema.virtual("tests", {
   },
 });
 
+appointmentSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "patient physician",
+    select: "firstName lastName photo email"
+  })
+  next();
+});
 
 // ================ Deepseek rewrote the logic and it's working, don't touch =================== //
 // Logic is to prevent appointment conflicts
 appointmentSchema.pre("save", async function (next) {
-  const APPOINTMENT_DURATION = 30 * 60 * 1000; 
+  const APPOINTMENT_DURATION = 30 * 60 * 1000;
   try {
     const Appointment = mongoose.models.Appointment;
     const physicianId = this.physician.toString();
